@@ -1,0 +1,637 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secret???</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background: #000;
+        color: white;
+    }
+
+    #game {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        overflow: hidden;
+        background: #080511;
+    }
+
+    /* BLACK TITLE SCREEN */
+    #titleScreen {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+    }
+
+    #title {
+        font-size: 70px;
+        font-weight: bold;
+        letter-spacing: 5px;
+        text-shadow:
+            0 0 10px #fff,
+            0 0 25px #9b59ff,
+            0 0 45px #6c2cff;
+        animation: titleGlow 2s infinite alternate;
+    }
+
+    @keyframes titleGlow {
+        from {
+            opacity: 0.6;
+            transform: scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1.03);
+        }
+    }
+
+    /* CAVE */
+    #cave {
+        position: absolute;
+        inset: 0;
+        display: none;
+        background:
+            radial-gradient(circle at 50% 35%, #382052 0%, #160c22 35%, #050308 80%);
+    }
+
+    .caveWall {
+        position: absolute;
+        background: #11091a;
+        border: 3px solid #281333;
+        box-shadow: inset 0 0 30px #000;
+    }
+
+    .wall1 {
+        left: -50px;
+        top: -30px;
+        width: 230px;
+        height: 120%;
+        transform: rotate(8deg);
+    }
+
+    .wall2 {
+        right: -50px;
+        top: -30px;
+        width: 230px;
+        height: 120%;
+        transform: rotate(-8deg);
+    }
+
+    /* GEMS */
+    .gem {
+        position: absolute;
+        width: 28px;
+        height: 42px;
+        background: linear-gradient(
+            135deg,
+            #ffffff,
+            #6ee7ff 25%,
+            #9b5cff 50%,
+            #ff4fd8 75%,
+            #ffffff
+        );
+        clip-path: polygon(
+            50% 0%,
+            90% 25%,
+            100% 70%,
+            50% 100%,
+            0% 70%,
+            10% 25%
+        );
+        box-shadow:
+            0 0 8px #8ceaff,
+            0 0 18px #a45cff;
+        animation: gemGlow 2s infinite alternate;
+    }
+
+    @keyframes gemGlow {
+        from {
+            filter: brightness(0.7);
+            transform: scale(0.9);
+        }
+        to {
+            filter: brightness(1.5);
+            transform: scale(1.08);
+        }
+    }
+
+    /* BIG RAINBOW GEM */
+    #rainbowGem {
+        position: absolute;
+        left: 50%;
+        top: 48%;
+        transform: translate(-50%, -50%);
+        width: 75px;
+        height: 105px;
+        background: linear-gradient(
+            135deg,
+            #ff3030,
+            #ff9d00,
+            #fff000,
+            #32ff70,
+            #2eeaff,
+            #5277ff,
+            #bd4dff,
+            #ff4dcc
+        );
+        clip-path: polygon(
+            50% 0%,
+            88% 22%,
+            100% 68%,
+            50% 100%,
+            0% 68%,
+            12% 22%
+        );
+        box-shadow:
+            0 0 15px #fff,
+            0 0 35px #ff5cff,
+            0 0 65px #6ee7ff;
+        cursor: pointer;
+        animation: rainbowFloat 2s infinite alternate;
+        z-index: 10;
+    }
+
+    @keyframes rainbowFloat {
+        from {
+            transform: translate(-50%, -50%) translateY(0);
+        }
+        to {
+            transform: translate(-50%, -50%) translateY(-12px);
+        }
+    }
+
+    /* CHARACTERS */
+    .character {
+        position: absolute;
+        bottom: 90px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        z-index: 20;
+    }
+
+    #duck {
+        left: 34%;
+        background: #ffd83d;
+        border: 5px solid #c99700;
+        box-shadow: 0 0 15px #ffe56b;
+    }
+
+    #duck::before {
+        content: "";
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        background: #111;
+        border-radius: 50%;
+        left: 23px;
+        top: 25px;
+        box-shadow: 38px 0 #111;
+    }
+
+    #duck::after {
+        content: "";
+        position: absolute;
+        width: 55px;
+        height: 25px;
+        background: #ff8a00;
+        border-radius: 50%;
+        left: 22px;
+        top: 50px;
+    }
+
+    #wizard {
+        right: 34%;
+        background: #6540c7;
+        border: 5px solid #a88cff;
+        box-shadow: 0 0 20px #825cff;
+    }
+
+    #wizard::before {
+        content: "★";
+        position: absolute;
+        font-size: 50px;
+        left: 22px;
+        top: 20px;
+        color: #fff;
+        text-shadow: 0 0 10px #fff;
+    }
+
+    /* DIALOGUE */
+    #dialogue {
+        position: absolute;
+        left: 50%;
+        bottom: 15px;
+        transform: translateX(-50%);
+        width: min(850px, 90%);
+        min-height: 120px;
+        background: rgba(5, 3, 10, 0.94);
+        border: 3px solid #9d6cff;
+        border-radius: 18px;
+        padding: 20px;
+        z-index: 50;
+        box-shadow: 0 0 25px #6c3cff;
+        display: none;
+    }
+
+    #speaker {
+        font-size: 24px;
+        font-weight: bold;
+        color: #d9b8ff;
+        margin-bottom: 10px;
+    }
+
+    #text {
+        font-size: 20px;
+        line-height: 1.4;
+        min-height: 55px;
+    }
+
+    #continueBtn {
+        position: absolute;
+        right: 18px;
+        bottom: 12px;
+        padding: 9px 18px;
+        border: none;
+        border-radius: 10px;
+        background: #8d55ff;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    #continueBtn:hover {
+        background: #b18aff;
+    }
+
+    /* GRAPE */
+    #grape {
+        position: absolute;
+        width: 65px;
+        height: 65px;
+        left: 34%;
+        bottom: 185px;
+        display: none;
+        z-index: 30;
+    }
+
+    .grapeBall {
+        position: absolute;
+        width: 23px;
+        height: 23px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 25%, #fff, #8b35ff 25%, #5315b8 70%);
+        box-shadow: 0 0 12px #a75cff;
+    }
+
+    .g1 { left: 20px; top: 20px; }
+    .g2 { left: 2px; top: 34px; }
+    .g3 { left: 25px; top: 38px; }
+    .g4 { left: 43px; top: 34px; }
+    .g5 { left: 13px; top: 52px; }
+    .g6 { left: 35px; top: 54px; }
+
+    #grapeLeaf {
+        position: absolute;
+        width: 28px;
+        height: 15px;
+        background: #4cff67;
+        border-radius: 100% 0;
+        left: 29px;
+        top: 3px;
+        transform: rotate(-20deg);
+    }
+
+    /* SCREEN FLASH */
+    #flash {
+        position: absolute;
+        inset: 0;
+        background: white;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 200;
+    }
+
+    .flashAnimation {
+        animation: flash 1s ease;
+    }
+
+    @keyframes flash {
+        0% { opacity: 0; }
+        30% { opacity: 0.9; }
+        100% { opacity: 0; }
+    }
+
+    /* CLICK MESSAGE */
+    #clickHint {
+        position: absolute;
+        top: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
+        color: #ddd;
+        display: none;
+        z-index: 40;
+        text-shadow: 0 0 8px #a866ff;
+    }
+
+    @media (max-width: 600px) {
+        #title {
+            font-size: 42px;
+        }
+
+        #text {
+            font-size: 17px;
+        }
+
+        .character {
+            width: 75px;
+            height: 75px;
+        }
+
+        #duck {
+            left: 18%;
+        }
+
+        #wizard {
+            right: 18%;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <!-- TITLE -->
+    <div id="titleScreen">
+        <div id="title">Secret???</div>
+    </div>
+
+    <!-- CAVE -->
+    <div id="cave">
+
+        <div class="caveWall wall1"></div>
+        <div class="caveWall wall2"></div>
+
+        <!-- Lots of gems -->
+        <div class="gem" style="left:8%;top:15%;"></div>
+        <div class="gem" style="left:17%;top:30%;"></div>
+        <div class="gem" style="left:25%;top:12%;"></div>
+        <div class="gem" style="left:31%;top:24%;"></div>
+        <div class="gem" style="left:42%;top:10%;"></div>
+        <div class="gem" style="left:55%;top:17%;"></div>
+        <div class="gem" style="left:67%;top:11%;"></div>
+        <div class="gem" style="left:78%;top:28%;"></div>
+        <div class="gem" style="left:88%;top:14%;"></div>
+
+        <div class="gem" style="left:11%;top:52%;"></div>
+        <div class="gem" style="left:20%;top:70%;"></div>
+        <div class="gem" style="left:29%;top:57%;"></div>
+        <div class="gem" style="left:38%;top:75%;"></div>
+        <div class="gem" style="left:51%;top:68%;"></div>
+        <div class="gem" style="left:62%;top:55%;"></div>
+        <div class="gem" style="left:73%;top:72%;"></div>
+        <div class="gem" style="left:85%;top:57%;"></div>
+        <div class="gem" style="left:93%;top:78%;"></div>
+
+        <div class="gem" style="left:5%;top:82%;"></div>
+        <div class="gem" style="left:15%;top:88%;"></div>
+        <div class="gem" style="left:32%;top:90%;"></div>
+        <div class="gem" style="left:57%;top:88%;"></div>
+        <div class="gem" style="left:76%;top:91%;"></div>
+
+        <!-- Rainbow Gem -->
+        <div id="rainbowGem" title="Take the rainbow gem"></div>
+
+        <!-- Duck -->
+        <div id="duck" class="character"></div>
+
+        <!-- Wizard -->
+        <div id="wizard" class="character"></div>
+
+        <!-- Magical grape -->
+        <div id="grape">
+            <div id="grapeLeaf"></div>
+            <div class="grapeBall g1"></div>
+            <div class="grapeBall g2"></div>
+            <div class="grapeBall g3"></div>
+            <div class="grapeBall g4"></div>
+            <div class="grapeBall g5"></div>
+            <div class="grapeBall g6"></div>
+        </div>
+
+        <div id="clickHint">
+            ✨ Click the rainbow gem ✨
+        </div>
+
+        <!-- Dialogue -->
+        <div id="dialogue">
+            <div id="speaker"></div>
+            <div id="text"></div>
+            <button id="continueBtn">Continue</button>
+        </div>
+
+    </div>
+
+    <div id="flash"></div>
+
+</div>
+
+<script>
+
+const titleScreen = document.getElementById("titleScreen");
+const cave = document.getElementById("cave");
+const dialogue = document.getElementById("dialogue");
+const speaker = document.getElementById("speaker");
+const text = document.getElementById("text");
+const continueBtn = document.getElementById("continueBtn");
+const rainbowGem = document.getElementById("rainbowGem");
+const grape = document.getElementById("grape");
+const flash = document.getElementById("flash");
+const clickHint = document.getElementById("clickHint");
+
+let dialogueStep = 0;
+let gemTaken = false;
+let grapeShown = false;
+
+/* Start Secret??? */
+setTimeout(() => {
+
+    titleScreen.style.display = "none";
+    cave.style.display = "block";
+    clickHint.style.display = "block";
+
+    setTimeout(() => {
+        showDialogue(
+            "Duck",
+            "Whoa... this cave is filled with gems!"
+        );
+    }, 1200);
+
+}, 4000);
+
+
+/* Dialogue system */
+function showDialogue(name, message) {
+    speaker.textContent = name;
+    text.textContent = message;
+    dialogue.style.display = "block";
+}
+
+
+/* Continue button */
+continueBtn.addEventListener("click", () => {
+
+    dialogueStep++;
+
+    if (dialogueStep === 1) {
+
+        showDialogue(
+            "Duck",
+            "These gems smell just like the magical grape..."
+        );
+
+    } else if (dialogueStep === 2) {
+
+        dialogue.style.display = "none";
+        clickHint.style.display = "block";
+
+    } else if (dialogueStep === 3) {
+
+        showDialogue(
+            "Duck",
+            "WHAT?! The gem turned into a magical grape!"
+        );
+
+    } else if (dialogueStep === 4) {
+
+        showDialogue(
+            "Duck",
+            "Wizard! The magical grape is real!"
+        );
+
+    } else if (dialogueStep === 5) {
+
+        showDialogue(
+            "Wizard",
+            "A magical grape...? Let me see it."
+        );
+
+    } else if (dialogueStep === 6) {
+
+        /* Grape turns back into gem */
+        grape.style.display = "none";
+        rainbowGem.style.display = "block";
+
+        flash.classList.remove("flashAnimation");
+        void flash.offsetWidth;
+        flash.classList.add("flashAnimation");
+
+        setTimeout(() => {
+
+            showDialogue(
+                "Duck",
+                "HUH?! IT TURNED BACK INTO A GEM?!"
+            );
+
+        }, 700);
+
+    } else if (dialogueStep === 7) {
+
+        showDialogue(
+            "Wizard",
+            "..."
+        );
+
+    } else if (dialogueStep === 8) {
+
+        showDialogue(
+            "Duck",
+            "So... was I imagining the grape?"
+        );
+
+    } else if (dialogueStep === 9) {
+
+        showDialogue(
+            "Wizard",
+            "Maybe this cave is hiding something we don't understand yet..."
+        );
+
+    } else if (dialogueStep === 10) {
+
+        dialogue.style.display = "none";
+        clickHint.style.display = "none";
+
+    }
+
+});
+
+
+/* Take the rainbow gem */
+rainbowGem.addEventListener("click", () => {
+
+    if (gemTaken) return;
+
+    gemTaken = true;
+
+    rainbowGem.style.animation = "none";
+
+    /* Move gem toward duck */
+    rainbowGem.style.transition = "all 1s ease";
+    rainbowGem.style.left = "34%";
+    rainbowGem.style.top = "65%";
+    rainbowGem.style.transform = "translate(-50%, -50%) scale(0.3)";
+
+    clickHint.style.display = "none";
+
+    setTimeout(() => {
+
+        /* Gem disappears */
+        rainbowGem.style.display = "none";
+
+        /* Flash */
+        flash.classList.remove("flashAnimation");
+        void flash.offsetWidth;
+        flash.classList.add("flashAnimation");
+
+        /* Show grape */
+        grape.style.display = "block";
+        grapeShown = true;
+
+        dialogueStep = 2;
+
+        setTimeout(() => {
+
+            showDialogue(
+                "Duck",
+                "Whoa... it changed when it touched me!"
+            );
+
+        }, 700);
+
+    }, 1000);
+
+});
+
+</script>
+
+</body>
+</html>
+```
